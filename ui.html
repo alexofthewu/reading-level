@@ -3,48 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <title>Reading Level Checker</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shadcn/ui@latest/dist/index.min.css" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     
-    :root {
-      --primary: 0 72.2% 50.6%;
-      --primary-foreground: 0 85.7% 97.3%;
-      --background: 0 0% 100%;
-      --foreground: 0 0% 3.9%;
-    }
-    
-    .dark {
-      --background: 0 0% 3.9%;
-      --foreground: 0 0% 98%;
-      --card: 0 0% 3.9%;
-      --card-foreground: 0 0% 98%;
-      --popover: 0 0% 3.9%;
-      --popover-foreground: 0 0% 98%;
-      --primary: 0 72.2% 50.6%;
-      --primary-foreground: 0 85.7% 97.3%;
-      --secondary: 0 0% 14.9%;
-      --secondary-foreground: 0 0% 98%;
-      --muted: 0 0% 14.9%;
-      --muted-foreground: 0 0% 63.9%;
-      --accent: 0 0% 14.9%;
-      --accent-foreground: 0 0% 98%;
-      --destructive: 0 62.8% 30.6%;
-      --destructive-foreground: 0 0% 98%;
-      --border: 0 0% 14.9%;
-      --input: 0 0% 14.9%;
-      --ring: 0 72.2% 50.6%;
-    }
-
-    html, body {
-      background-color: hsl(var(--background));
-      color: hsl(var(--foreground));
-    }
-
     body {
       margin: 0;
       padding: 16px;
-      font-family: 'Inter', sans-serif;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: hsl(240 10% 3.9%);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
 
     .container {
@@ -53,177 +21,128 @@
     }
 
     .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
+      margin-bottom: 1.5rem;
     }
 
     .title {
-      font-size: 1.25rem;
-      font-weight: 700;
+      font-size: 0.75rem;
+      font-weight: 500;
+      line-height: 1rem;
+      margin: 0;
+      color: hsl(240 5% 64.9%);
+    }
+
+    .header .title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      line-height: 2rem;
+      letter-spacing: -0.025em;
+      color: hsl(240 4.9% 83.9%);
     }
 
     .subtitle {
       font-size: 0.875rem;
-      color: var(--muted-foreground);
-    }
-
-    .theme-toggle {
-      padding: 0.5rem;
-      border-radius: 0.375rem;
-    }
-
-    .theme-toggle:hover {
-      background-color: var(--accent);
-    }
-
-    .progress-container {
-      margin-bottom: 1rem;
-    }
-
-    .progress-header {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 0.25rem;
-    }
-
-    .progress-text {
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
-
-    .progress-bar-container {
-      width: 100%;
-      height: 0.5rem;
-      background-color: var(--secondary);
-      border-radius: 9999px;
-    }
-
-    .progress-bar {
-      height: 100%;
-      background-color: var(--primary);
-      border-radius: 9999px;
-      transition: width 300ms;
-    }
-
-    .results {
-      margin-bottom: 1rem;
+      line-height: 1.25rem;
+      color: var(--figma-color-text-secondary);
+      margin: 0.25rem 0 0 0;
     }
 
     .card {
-      border: 1px solid var(--border);
+      border: 1px solid var(--figma-color-border);
       border-radius: 0.5rem;
-      background-color: var(--card);
-      color: var(--card-foreground);
-      box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      margin-bottom: 1rem;
+      background-color: hsl(240 5.9% 10%);
     }
 
     .card-content {
       padding: 1rem;
-      display: grid;
-      gap: 1rem;
     }
 
-    .text-section {
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 1rem;
+    .score-row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .score-card {
+      flex: 1;
     }
 
     .score-section {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: left;
     }
 
-    .tag {
-      padding: 0.25rem 0.625rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 500;
+    .score-value {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.025em;
+      color: hsl(240 4.9% 83.9%);
+      text-align: center;
+    }
+
+    .readability-value {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.025em;
+      text-align: center;
+    }
+
+    .readability-easy {
+      color: hsl(142.1 70.6% 45.3%);
+    }
+
+    .readability-average {
+      color: hsl(45.4 93.4% 47.5%);
+    }
+
+    .readability-hard {
+      color: hsl(0 84.2% 60.2%);
     }
 
     .button {
       width: 100%;
-      background-color: hsl(var(--primary));
-      color: hsl(var(--primary-foreground));
+      background-color: #EF4444;
+      color: white;
       padding: 0.5rem 1rem;
       border-radius: 0.375rem;
+      font-family: inherit;
+      font-size: 0.875rem;
       font-weight: 500;
+      line-height: 1.25rem;
+      border: none;
+      cursor: pointer;
       transition: background-color 150ms;
     }
 
     .button:hover {
-      background-color: hsl(var(--primary) / 0.9);
+      background-color: #DC2626;
     }
 
-    .button:focus {
-      outline: none;
-      ring: 2px solid hsl(var(--ring));
-      ring-offset: 2px;
-    }
-
-    .hidden {
-      display: none;
-    }
-
-    .tag-easy {
-      background-color: #dcfce7;
-      color: #166534;
-    }
-
-    .dark .tag-easy {
-      background-color: #064e3b;
-      color: #86efac;
-    }
-
-    .tag-average {
-      background-color: #fef9c3;
-      color: #854d0e;
-    }
-
-    .dark .tag-average {
-      background-color: #713f12;
-      color: #fef08a;
-    }
-
-    .tag-hard {
-      background-color: #fee2e2;
-      color: #991b1b;
-    }
-
-    .dark .tag-hard {
-      background-color: #7f1d1d;
-      color: #fecaca;
+    .selected-text {
+      font-size: 0.875rem;
+      line-height: 1.5rem;
+      margin-top: 0.5rem;
+      color: hsl(240 4.9% 83.9%);
+      display: -webkit-box;
+      -webkit-line-clamp: 6;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <div>
-        <h3 class="title">Literacy</h3>
-        <p class="subtitle">Analyze text using Flesch-Kincaid Grade Level</p>
-      </div>
-      <button id="themeToggle" class="theme-toggle">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="5"/>
-          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-        </svg>
-      </button>
+      <h1 class="title">Literacy</h1>
+      <p class="subtitle">Analyze text using Flesch-Kincaid Grade Level</p>
     </div>
 
-    <div id="progressContainer" class="progress-container hidden">
-      <div class="progress-header">
-        <span class="progress-text">Analyzing text...</span>
-        <span id="progressText" class="progress-text">0%</span>
-      </div>
-      <div class="progress-bar-container">
-        <div id="progressBar" class="progress-bar" style="width: 0%"></div>
-      </div>
-    </div>
-
-    <div id="results" class="results"></div>
+    <div id="results"></div>
 
     <button id="checkBtn" class="button">
       Check Selected Text
@@ -231,63 +150,33 @@
   </div>
 
   <script>
-    // Initialize DOM elements
-    const themeToggle = document.getElementById('themeToggle');
     const checkBtn = document.getElementById('checkBtn');
-    const progressContainer = document.getElementById('progressContainer');
-    const progressBar = document.getElementById('progressBar');
-    const progressText = document.getElementById('progressText');
     const resultsDiv = document.getElementById('results');
-    let isDark = false;
-
-    // Function declarations
-    function handleThemeToggle() {
-      isDark = !isDark;
-      document.documentElement.classList.toggle('dark', isDark);
-      parent.postMessage({ 
-        pluginMessage: { 
-          type: 'theme-changed',
-          isDark: isDark
-        }
-      }, '*');
-    }
 
     function handleCheckButton() {
       resultsDiv.innerHTML = '';
-      progressContainer.classList.remove('hidden');
       parent.postMessage({ 
         pluginMessage: { type: 'analyze-text' }
       }, '*');
     }
 
-    function resizeWindow() {
-      const height = Math.min(800, document.body.scrollHeight + 40);
-      parent.postMessage({ 
-        pluginMessage: { 
-          type: 'resize', 
-          height: height 
-        }
-      }, '*');
-    }
-
-    function getTagClass(readingLevel) {
+    function getReadabilityClass(readingLevel) {
       switch(readingLevel) {
-        case 'Easy': return 'tag-easy';
-        case 'Average': return 'tag-average';
-        case 'Hard': return 'tag-hard';
+        case 'Easy': return 'readability-easy';
+        case 'Average': return 'readability-average';
+        case 'Hard': return 'readability-hard';
         default: return '';
       }
     }
 
     function handleAnalysisResults(message) {
-      progressContainer.classList.add('hidden');
       resultsDiv.innerHTML = '';
       
       if (!message.results || message.results.length === 0) {
         resultsDiv.innerHTML = `
           <div class="card">
             <div class="card-content">
-              Please select one or more text layers to analyze.
+              <p class="subtitle">Please select one or more text layers to analyze.</p>
             </div>
           </div>
         `;
@@ -296,60 +185,43 @@
           resultsDiv.innerHTML += `
             <div class="card">
               <div class="card-content">
-                <div class="text-section">
-                  <p class="title">Selected Text</p>
-                  <p class="subtitle">${result.text}</p>
-                </div>
-                <div class="score-section">
-                  <div>
-                    <p class="title">Flesch-Kincaid Score</p>
-                    <p style="font-size: 1.5rem; font-weight: bold;">${result.score.toFixed(1)}</p>
+                <h2 class="title">Selected Text</h2>
+                <p class="selected-text">${result.text}</p>
+              </div>
+            </div>
+            <div class="score-row">
+              <div class="card score-card">
+                <div class="card-content">
+                  <div class="score-section">
+                    <h2 class="title">Readability</h2>
+                    <p class="readability-value ${getReadabilityClass(result.readingLevel)}">${result.readingLevel}</p>
                   </div>
-                  <span class="tag ${getTagClass(result.readingLevel)}">
-                    ${result.readingLevel}
-                  </span>
+                </div>
+              </div>
+              <div class="card score-card">
+                <div class="card-content">
+                  <div class="score-section">
+                    <h2 class="title">Flesch-Kincaid Score</h2>
+                    <p class="score-value">${result.score.toFixed(1)}</p>
+                  </div>
                 </div>
               </div>
             </div>
           `;
         });
       }
-      
-      resizeWindow();
     }
 
-    function handleProgress(message) {
-      progressContainer.classList.remove('hidden');
-      const percentage = Math.round(message.progress * 100);
-      progressBar.style.width = `${percentage}%`;
-      progressText.textContent = `${percentage}%`;
-    }
-
-    // Event listeners
-    themeToggle.addEventListener('click', handleThemeToggle);
     checkBtn.addEventListener('click', handleCheckButton);
 
-    // Plugin message handler
     window.addEventListener('message', event => {
       if (!event.data.pluginMessage) return;
       const message = event.data.pluginMessage;
       
-      switch (message.type) {
-        case 'init-theme':
-          isDark = message.isDark;
-          document.documentElement.classList.toggle('dark', isDark);
-          break;
-        case 'analysis-progress':
-          handleProgress(message);
-          break;
-        case 'analysis-results':
-          handleAnalysisResults(message);
-          break;
+      if (message.type === 'analysis-results') {
+        handleAnalysisResults(message);
       }
     });
-
-    // Initial resize
-    resizeWindow();
   </script>
 </body>
 </html>

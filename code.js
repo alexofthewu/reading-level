@@ -1,14 +1,8 @@
 // This plugin checks text layers for reading level using Flesch-Kincaid Grade Level
 figma.showUI(__html__, { 
   width: 400, 
-  height: 200,  // Start with minimal height
+  height: 600,
   themeColors: true 
-});
-
-// Send initial theme to UI
-figma.ui.postMessage({ 
-  type: 'init-theme',
-  isDark: figma.ui.getTheme() === 'dark'
 });
 
 // Initialize text scoring functions
@@ -40,32 +34,6 @@ function getFleschKincaidGrade(text) {
 
   return (0.39 * avgSentenceLength) + (11.8 * avgSyllablesPerWord) - 15.59;
 }
-
-// Main plugin logic
-
-// Add function to resize window
-function resizeWindow() {
-  // Get the body height and add some padding
-  const height = Math.min(800, document.body.scrollHeight + 40);
-  parent.postMessage({ 
-    pluginMessage: { 
-      type: 'resize', 
-      height: height 
-    }
-  }, '*');
-}
-
-// Add theme change listener
-figma.ui.onmessage = (msg) => {
-  if (msg.type === 'analyze-text') {
-    updateSelectedNodes();
-  } else if (msg.type === 'resize') {
-    figma.ui.resize(400, msg.height);
-  } else if (msg.type === 'theme-changed') {
-    // Update the UI theme when toggled
-    figma.ui.setTheme(msg.isDark ? 'dark' : 'light');
-  }
-};
 
 function getReadingLevel(score) {
   if (score <= 5) return 'Easy';
@@ -112,6 +80,9 @@ function updateSelectedNodes() {
   });
 }
 
-// Don't automatically run on selection change as it might be annoying
-// Instead, only run when the Check button is clicked
-// figma.on('selectionchange', updateSelectedNodes);
+// Message handler
+figma.ui.onmessage = (msg) => {
+  if (msg.type === 'analyze-text') {
+    updateSelectedNodes();
+  }
+};
