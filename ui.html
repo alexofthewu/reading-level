@@ -55,7 +55,11 @@
     }
 
     .card-content {
-      padding: 1rem;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 0.75rem 1rem;
     }
 
     .sentence-case-card .card-content {
@@ -127,15 +131,25 @@
       background-color: #DC2626;
     }
 
+    .selected-text-card .card-content {
+      padding: 0;
+    }
+
+    .selected-text-header {
+      padding: 0.75rem 1rem;
+    }
+
     .selected-text {
+      text-align: left;
+      padding: 0.75rem 1rem;
+      width: 100%;
+      box-sizing: border-box;
       font-size: 0.875rem;
       line-height: 1.5rem;
-      margin-top: 0.5rem;
       color: hsl(240 4.9% 83.9%);
-      display: -webkit-box;
-      -webkit-line-clamp: 6;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      white-space: pre-wrap;
+      word-break: break-word;
+      border-top: 1px solid var(--figma-color-border);
     }
 
     .sentence-case-value {
@@ -161,6 +175,89 @@
     .icon {
       width: 16px;
       height: 16px;
+    }
+
+    .analysis-section {
+      margin-bottom: 0.5rem;
+    }
+
+    .analysis-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .analysis-card {
+      flex: 1;
+    }
+
+    .card-disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .analysis-title {
+      font-size: 0.875rem;
+      font-weight: 600;
+      line-height: 1.25rem;
+      color: hsl(240 5% 64.9%);
+      margin-bottom: 0.5rem;
+    }
+
+    .analysis-result {
+      display: flex;
+      flex-direction: column-reverse;
+      width: 100%;
+      gap: 0.375rem;
+      align-items: flex-start;
+    }
+
+    .analysis-card .card-content {
+      padding: 0.625rem 0.75rem;
+      height: auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
+
+    .analysis-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      line-height: 1rem;
+      color: hsl(240 5% 64.9%);
+      margin: 0;
+      width: 100%;
+      text-align: left;
+    }
+
+    .icon-success {
+      color: hsl(142.1 70.6% 45.3%);
+    }
+
+    .icon-failure {
+      color: hsl(0 84.2% 60.2%);
+    }
+
+    .icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    .readability-value, .score-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1;
+      margin: 0;
+      text-align: left;
+    }
+
+    .title {
+      font-size: 0.75rem;
+      font-weight: 500;
+      line-height: 1rem;
+      color: hsl(240 5% 64.9%);
+      margin: 0;
+      text-align: left;
+      width: 100%;
     }
   </style>
 </head>
@@ -255,43 +352,47 @@
       } else {
         message.results.forEach(result => {
           const isSentenceCaseUsed = isSentenceCase(result.text);
-          const sentenceCaseClass = isSentenceCaseUsed ? 'sentence-case-success' : 'sentence-case-failure';
-          const sentenceCaseText = isSentenceCaseUsed ? 'Sentence case achieved' : 'Text is not sentence case';
+          const iconClass = isSentenceCaseUsed ? 'icon-success' : 'icon-failure';
           const icon = isSentenceCaseUsed 
             ? '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>'
             : '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>';
 
           resultsDiv.innerHTML += `
-            <div class="card">
+            <div class="card selected-text-card">
               <div class="card-content">
-                <h2 class="title">Selected Text</h2>
-                <p class="selected-text">${result.text}</p>
+                <div class="selected-text-header">
+                  <h2 class="title">Selected Text</h2>
+                </div>
+                <div class="selected-text">${result.text}</div>
               </div>
             </div>
-            <div class="score-row">
-              <div class="card score-card">
-                <div class="card-content">
-                  <div class="score-section">
-                    <h2 class="title">Readability</h2>
-                    <p class="readability-value ${getReadabilityClass(result.readingLevel)}">${result.readingLevel}</p>
+            <div class="analysis-section">
+              <h4 class="analysis-title">Analysis</h4>
+              <div class="analysis-row">
+                <div class="card analysis-card">
+                  <div class="card-content">
+                    <div class="analysis-result">
+                      <p class="analysis-label">Sentence Case</p>
+                      <span class="${iconClass}">${icon}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div class="card score-card">
-                <div class="card-content">
-                  <div class="score-section">
-                    <h2 class="title">Flesch-Kincaid Score</h2>
-                    <p class="score-value">${result.score.toFixed(1)}</p>
+                <div class="card analysis-card">
+                  <div class="card-content">
+                    <div class="analysis-result">
+                      <p class="analysis-label">Readability</p>
+                      <p class="readability-value ${getReadabilityClass(result.readingLevel)}">${result.readingLevel}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-            <div class="card sentence-case-card">
-              <div class="card-content">
-                <p class="sentence-case-value ${sentenceCaseClass}">
-                  ${icon}
-                  ${sentenceCaseText}
-                </p>
+                <div class="card analysis-card">
+                  <div class="card-content">
+                    <div class="analysis-result">
+                      <p class="analysis-label">Flesch-Kincaid</p>
+                      <p class="score-value">${result.score.toFixed(1)}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           `;
