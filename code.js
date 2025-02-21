@@ -41,50 +41,84 @@ function getReadingLevel(score) {
   return 'Hard';
 }
 
-function updateSelectedNodes() {
-  const textNodes = figma.currentPage.selection
-    .filter(node => node.type === 'TEXT');
+// Function to analyze text
+async function analyzeSelectedText() {
+  const selection = figma.currentPage.selection;
+  
+  // Check if selection contains text nodes or components with text
+  const textNodes = selection.reduce((nodes, node) => {
+    if (node.type === "TEXT") {
+      nodes.push(node);
+    } else if (node.type === "COMPONENT" || node.type === "INSTANCE") {
+      // Find all text nodes within components
+      const textChildren = node.findAll(child => child.type === "TEXT");
+      nodes.push(...textChildren);
+    }
+    return nodes;
+  }, []);
 
-  if (textNodes.length === 0) {
+  const selectedTextNodes = textNodes.map(node => node.characters);
+
+  if (selectedTextNodes.length > 0) {
+    const results = selectedTextNodes.map((text) => {
+      const score = getFleschKincaidGrade(text);
+      return {
+        text,
+        score,
+        readingLevel: getReadingLevel(score)
+      };
+    });
+
     figma.ui.postMessage({
       type: 'analysis-results',
-      results: [],
-      message: 'No text layers selected'
+      results
     });
-    return;
-  }
-
-  const results = [];
-
-  textNodes.forEach((node, index) => {
+  } else {
     figma.ui.postMessage({
-      type: 'analysis-progress',
-      progress: (index + 1) / textNodes.length
+      type: 'analysis-results',
+      results: []
     });
-
-    const text = node.characters;
-    const score = getFleschKincaidGrade(text);
-    const readingLevel = getReadingLevel(score);
-    
-    results.push({
-      text: text,
-      readingLevel: readingLevel,
-      score: score,
-      nodeId: node.id
-    });
-  });
-
-  figma.ui.postMessage({
-    type: 'analysis-results',
-    results: results
-  });
+  }
 }
 
-// Listen for resize messages from the UI
+// Listen for selection changes
+figma.on('selectionchange', () => {
+  analyzeSelectedText();
+});
+
+// Listen for text changes in selected nodes
+figma.on('documentchange', (event) => {
+  // Check if the change affects any selected nodes
+  const selectedNodes = figma.currentPage.selection;
+  const selectedIds = new Set(selectedNodes.map(node => node.id));
+  
+  // If any changed node is selected or is within a selected component, reanalyze
+  const shouldReanalyze = event.documentChanges.some(change => {
+    if (selectedIds.has(change.id)) return true;
+    
+    // Check if the changed node is within a selected component
+    const node = figma.getNodeById(change.id);
+    if (node && node.type === "TEXT") {
+      let currentParent = node.parent;
+      while (currentParent) {
+        if (selectedIds.has(currentParent.id)) return true;
+        currentParent = currentParent.parent;
+      }
+    }
+    return false;
+  });
+
+  if (shouldReanalyze) {
+    analyzeSelectedText();
+  }
+});
+
+// Listen for UI messages
 figma.ui.onmessage = (message) => {
   if (message.type === 'resize') {
     figma.ui.resize(420, message.height + 10);
-  } else if (message.type === 'analyze-text') {
-    updateSelectedNodes();
   }
 };
+
+// Initial analysis of any selected text
+analyzeSelectedText();

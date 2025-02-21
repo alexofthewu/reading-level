@@ -273,14 +273,9 @@
     </div>
 
     <div id="results"></div>
-
-    <button id="checkBtn" class="button">
-      Check Selected Text
-    </button>
   </div>
 
   <script>
-    const checkBtn = document.getElementById('checkBtn');
     const resultsDiv = document.getElementById('results');
 
     function handleCheckButton() {
@@ -417,7 +412,9 @@
     // Initial height update
     setTimeout(updateWindowHeight, 0);
 
-    checkBtn.addEventListener('click', handleCheckButton);
+    document.addEventListener('DOMContentLoaded', () => {
+      resultsDiv = document.getElementById('results');
+    });
 
     window.addEventListener('message', event => {
       if (!event.data.pluginMessage) return;
