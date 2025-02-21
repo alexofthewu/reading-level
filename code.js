@@ -35,8 +35,8 @@ function getFleschKincaidGrade(text) {
 let targetGradeLevel = 5.0; // Default target grade level
 
 figma.ui.onmessage = (msg) => {
-  if (msg.type === 'setGradeLevel') {
-    targetGradeLevel = parseFloat(msg.gradeLevel);
+  if (msg.type === 'analyze-text') {
+    targetGradeLevel = parseFloat(msg.targetGrade);
     updateSelectedNodes();
   }
 };
@@ -44,6 +44,17 @@ figma.ui.onmessage = (msg) => {
 function updateSelectedNodes() {
   const textNodes = figma.currentPage.selection
     .filter(node => node.type === 'TEXT');
+
+  if (textNodes.length === 0) {
+    figma.ui.postMessage({
+      type: 'analysis-results',
+      results: [],
+      message: 'No text layers selected'
+    });
+    return;
+  }
+
+  const results = [];
 
   textNodes.forEach((node, index) => {
     // Send progress update
@@ -55,27 +66,22 @@ function updateSelectedNodes() {
     const text = node.characters;
     const grade = getFleschKincaidGrade(text);
     
-    // Add or update reading level indicator
-    const indicator = figma.createText();
-    const isGradeLevelAppropriate = grade <= targetGradeLevel;
-    const gradeText = `Reading Level: Grade ${grade.toFixed(1)}`;
-    const feedback = isGradeLevelAppropriate ? 
-      ` ✅ Meets Grade ${targetGradeLevel} target` : 
-      ` ⚠️ Above Grade ${targetGradeLevel} level`;
-    
-    indicator.characters = gradeText + feedback;
-    indicator.x = node.x;
-    indicator.y = node.y - 20;
-    
-    // Style the indicator
-    indicator.fontSize = 10;
-    indicator.fills = [{
-      type: 'SOLID', 
-      color: isGradeLevelAppropriate ? 
-        {r: 0, g: 0.7, b: 0} :  // Green for appropriate level
-        {r: 1, g: 0.6, b: 0}    // Orange for too high
-    }];
+    // Add result to array instead of creating indicators
+    results.push({
+      text: text,
+      readingLevel: grade,
+      nodeId: node.id
+    });
+  });
+
+  // Send all results at once
+  figma.ui.postMessage({
+    type: 'analysis-results',
+    results: results,
+    targetGrade: targetGradeLevel
   });
 }
 
-figma.on('selectionchange', updateSelectedNodes);
+// Don't automatically run on selection change as it might be annoying
+// Instead, only run when the Check button is clicked
+// figma.on('selectionchange', updateSelectedNodes);

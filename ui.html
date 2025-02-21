@@ -58,6 +58,11 @@
   <script>
     document.getElementById('checkBtn').onclick = () => {
       const targetGrade = parseInt(document.getElementById('targetGrade').value, 10);
+      // Clear previous results
+      document.getElementById('results').innerHTML = '';
+      // Show progress bar
+      document.getElementById('progressContainer').classList.remove('hidden');
+      
       parent.postMessage({ 
         pluginMessage: { 
           type: 'analyze-text',
@@ -67,7 +72,13 @@
     };
 
     window.onmessage = (event) => {
+      if (!event.data.pluginMessage) {
+        console.log('Received invalid message:', event.data);
+        return;
+      }
+
       const message = event.data.pluginMessage;
+      console.log('Received message:', message); // Debug log
       
       if (message.type === 'analysis-progress') {
         const progressContainer = document.getElementById('progressContainer');
@@ -86,6 +97,15 @@
         
         const resultsDiv = document.getElementById('results');
         resultsDiv.innerHTML = '';
+        
+        if (!message.results || message.results.length === 0) {
+          resultsDiv.innerHTML = `
+            <div class="p-3 rounded-md border border-yellow-300 bg-yellow-50 text-yellow-700">
+              Please select one or more text layers to analyze.
+            </div>
+          `;
+          return;
+        }
         
         message.results.forEach(result => {
           const div = document.createElement('div');
