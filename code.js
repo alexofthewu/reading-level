@@ -1,5 +1,9 @@
 // This plugin checks text layers for reading level using Flesch-Kincaid Grade Level
-figma.showUI(__html__, { width: 400, height: 300 });
+figma.showUI(__html__, { 
+  width: 400, 
+  height: 200,  // Start with minimal height
+  themeColors: true 
+});
 
 // Initialize text scoring functions
 function countSyllables(word) {
@@ -32,12 +36,25 @@ function getFleschKincaidGrade(text) {
 }
 
 // Main plugin logic
-let targetGradeLevel = 5.0; // Default target grade level
 
+// Add function to resize window
+function resizeWindow() {
+  // Get the body height and add some padding
+  const height = Math.min(800, document.body.scrollHeight + 40);
+  parent.postMessage({ 
+    pluginMessage: { 
+      type: 'resize', 
+      height: height 
+    }
+  }, '*');
+}
+
+// Simplify message handler
 figma.ui.onmessage = (msg) => {
   if (msg.type === 'analyze-text') {
-    targetGradeLevel = parseFloat(msg.targetGrade);
     updateSelectedNodes();
+  } else if (msg.type === 'resize') {
+    figma.ui.resize(400, msg.height);
   }
 };
 
@@ -82,8 +99,7 @@ function updateSelectedNodes() {
 
   figma.ui.postMessage({
     type: 'analysis-results',
-    results: results,
-    targetGrade: targetGradeLevel
+    results: results
   });
 }
 
