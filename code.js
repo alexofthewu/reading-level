@@ -1,7 +1,7 @@
 // This plugin checks text layers for reading level using Flesch-Kincaid Grade Level
 figma.showUI(__html__, { 
-  width: 400, 
-  height: 600,
+  width: 420, 
+  height: 300,
   themeColors: true 
 });
 
@@ -80,9 +80,11 @@ function updateSelectedNodes() {
   });
 }
 
-// Message handler
-figma.ui.onmessage = (msg) => {
-  if (msg.type === 'analyze-text') {
+// Listen for resize messages from the UI
+figma.ui.onmessage = (message) => {
+  if (message.type === 'resize') {
+    figma.ui.resize(420, message.height + 10);
+  } else if (message.type === 'analyze-text') {
     updateSelectedNodes();
   }
 };
