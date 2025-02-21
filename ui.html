@@ -50,7 +50,7 @@
     .card {
       border: 1px solid var(--figma-color-border);
       border-radius: 0.5rem;
-      margin-bottom: 1rem;
+      margin-bottom: 0.5rem;
       background-color: hsl(240 5.9% 10%);
     }
 
@@ -58,10 +58,14 @@
       padding: 1rem;
     }
 
+    .sentence-case-card .card-content {
+      padding: 0.75rem 1rem;
+    }
+
     .score-row {
       display: flex;
-      gap: 1rem;
-      margin-bottom: 1rem;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
     }
 
     .score-card {
@@ -133,6 +137,31 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+
+    .sentence-case-value {
+      font-size: 1rem;
+      font-weight: 500;
+      line-height: 1.5;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin: 0;
+    }
+
+    .sentence-case-success {
+      color: hsl(142.1 70.6% 45.3%);
+    }
+
+    .sentence-case-failure {
+      color: hsl(0 84.2% 60.2%);
+    }
+
+    .icon {
+      width: 16px;
+      height: 16px;
+    }
   </style>
 </head>
 <body>
@@ -169,6 +198,49 @@
       }
     }
 
+    function isSentenceCase(text) {
+      // Add a period if text doesn't end with punctuation
+      const normalizedText = text.trim().replace(/[.!?]*$/, '') + '.';
+      
+      // Split into sentences, handling multiple punctuation marks and preserving whitespace
+      const sentences = normalizedText.split(/(?<=[.!?])\s+/);
+      
+      return sentences.every(sentence => {
+        // Skip empty sentences
+        if (!sentence.trim()) return true;
+        
+        // Find the first letter character in the sentence
+        const firstLetterMatch = sentence.match(/[a-zA-Z]/);
+        if (!firstLetterMatch) return true; // No letters in sentence
+        
+        // Get the first letter and its position
+        const firstLetter = firstLetterMatch[0];
+        const pos = firstLetterMatch.index;
+        
+        // Check if first letter is uppercase
+        const isFirstUppercase = firstLetter === firstLetter.toUpperCase();
+        
+        // Check if any other letters in the sentence are incorrectly uppercase
+        const restOfSentence = sentence.slice(pos + 1);
+        const hasIncorrectUppercase = restOfSentence
+          .split(/[.!?]\s+/) // Handle any nested sentences
+          .some(part => {
+            // Allow proper nouns and common acronyms
+            const words = part.split(/\s+/);
+            return words.some(word => {
+              // Skip empty words or single letters
+              if (word.length <= 1) return false;
+              // Skip words that look like proper nouns or acronyms
+              if (/^[A-Z][a-z]+$/.test(word) || /^[A-Z]+$/.test(word)) return false;
+              // Check for any other uppercase letters
+              return /[A-Z]/.test(word);
+            });
+          });
+
+        return isFirstUppercase && !hasIncorrectUppercase;
+      });
+    }
+
     function handleAnalysisResults(message) {
       resultsDiv.innerHTML = '';
       
@@ -182,6 +254,13 @@
         `;
       } else {
         message.results.forEach(result => {
+          const isSentenceCaseUsed = isSentenceCase(result.text);
+          const sentenceCaseClass = isSentenceCaseUsed ? 'sentence-case-success' : 'sentence-case-failure';
+          const sentenceCaseText = isSentenceCaseUsed ? 'Sentence case achieved' : 'Text is not sentence case';
+          const icon = isSentenceCaseUsed 
+            ? '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>'
+            : '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+
           resultsDiv.innerHTML += `
             <div class="card">
               <div class="card-content">
@@ -205,6 +284,14 @@
                     <p class="score-value">${result.score.toFixed(1)}</p>
                   </div>
                 </div>
+              </div>
+            </div>
+            <div class="card sentence-case-card">
+              <div class="card-content">
+                <p class="sentence-case-value ${sentenceCaseClass}">
+                  ${icon}
+                  ${sentenceCaseText}
+                </p>
               </div>
             </div>
           `;
