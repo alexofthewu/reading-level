@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Reading Level Checker</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 16px; }
+    button { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h3>Reading Level Checker</h3>
+  <label>Target Grade Level:
+    <input type="number" id="targetGrade" value="5" min="1" max="12" />
+  </label>
+  <button id="checkBtn">Check</button>
+  <div id="results"></div>
+
+  <script>
+    document.getElementById('checkBtn').onclick = () => {
+      const targetGrade = parseInt(document.getElementById('targetGrade').value, 10);
+      parent.postMessage({ pluginMessage: { type: 'check-reading-level', targetGrade } }, '*');
+    };
+
+    window.onmessage = (event) => {
+      const { type, results } = event.data.pluginMessage;
+      if (type === 'reading-level-results') {
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '';
+        results.forEach(({ characters, gradeLevel }) => {
+          const p = document.createElement('p');
+          p.textContent = `Text: "${characters.slice(0, 30)}..." - Grade Level: ${gradeLevel}`;
+          resultsDiv.appendChild(p);
+        });
+      }
+    };
+  </script>
+</body>
+</html>
