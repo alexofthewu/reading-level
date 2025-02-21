@@ -13,11 +13,13 @@
       background-color: hsl(240 10% 3.9%);
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
+      overflow: hidden;
     }
 
     .container {
-      max-width: 28rem;
+      max-width: 100%;
       margin: 0 auto;
+      overflow: hidden;
     }
 
     .header {
@@ -150,6 +152,8 @@
       white-space: pre-wrap;
       word-break: break-word;
       border-top: 1px solid var(--figma-color-border);
+      overflow-wrap: break-word;
+      max-width: 100%;
     }
 
     .sentence-case-value {
@@ -338,6 +342,13 @@
       });
     }
 
+    // Function to update window height
+    function updateWindowHeight() {
+      const height = document.body.scrollHeight;
+      parent.postMessage({ pluginMessage: { type: 'resize', height } }, '*');
+    }
+
+    // Call updateWindowHeight after results are rendered
     function handleAnalysisResults(message) {
       resultsDiv.innerHTML = '';
       
@@ -398,7 +409,13 @@
           `;
         });
       }
+      
+      // Update height after content is rendered
+      setTimeout(updateWindowHeight, 0);
     }
+
+    // Initial height update
+    setTimeout(updateWindowHeight, 0);
 
     checkBtn.addEventListener('click', handleCheckButton);
 
