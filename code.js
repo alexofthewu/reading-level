@@ -5,6 +5,12 @@ figma.showUI(__html__, {
   themeColors: true 
 });
 
+// Send initial theme to UI
+figma.ui.postMessage({ 
+  type: 'init-theme',
+  isDark: figma.ui.getTheme() === 'dark'
+});
+
 // Initialize text scoring functions
 function countSyllables(word) {
   word = word.toLowerCase();
@@ -49,12 +55,15 @@ function resizeWindow() {
   }, '*');
 }
 
-// Simplify message handler
+// Add theme change listener
 figma.ui.onmessage = (msg) => {
   if (msg.type === 'analyze-text') {
     updateSelectedNodes();
   } else if (msg.type === 'resize') {
     figma.ui.resize(400, msg.height);
+  } else if (msg.type === 'theme-changed') {
+    // Update the UI theme when toggled
+    figma.ui.setTheme(msg.isDark ? 'dark' : 'light');
   }
 };
 

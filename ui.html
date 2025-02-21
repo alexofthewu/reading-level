@@ -3,52 +3,304 @@
 <head>
   <meta charset="UTF-8" />
   <title>Reading Level Checker</title>
-  <!-- Add Tailwind CSS via CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shadcn/ui@latest/dist/index.min.css" />
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    
+    :root {
+      --primary: 0 72.2% 50.6%;
+      --primary-foreground: 0 85.7% 97.3%;
+    }
+    
+    .dark {
+      --background: 0 0% 3.9%;
+      --foreground: 0 0% 98%;
+      --card: 0 0% 3.9%;
+      --card-foreground: 0 0% 98%;
+      --popover: 0 0% 3.9%;
+      --popover-foreground: 0 0% 98%;
+      --primary: 0 72.2% 50.6%;
+      --primary-foreground: 0 85.7% 97.3%;
+      --secondary: 0 0% 14.9%;
+      --secondary-foreground: 0 0% 98%;
+      --muted: 0 0% 14.9%;
+      --muted-foreground: 0 0% 63.9%;
+      --accent: 0 0% 14.9%;
+      --accent-foreground: 0 0% 98%;
+      --destructive: 0 62.8% 30.6%;
+      --destructive-foreground: 0 0% 98%;
+      --border: 0 0% 14.9%;
+      --input: 0 0% 14.9%;
+      --ring: 0 72.2% 50.6%;
+    }
+
     body {
       margin: 0;
       padding: 16px;
-      overflow: hidden;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .container {
+      max-width: 28rem;
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .title {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 0.875rem;
+      color: var(--muted-foreground);
+    }
+
+    .theme-toggle {
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+    }
+
+    .theme-toggle:hover {
+      background-color: var(--accent);
+    }
+
+    .progress-container {
+      margin-bottom: 1rem;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.25rem;
+    }
+
+    .progress-text {
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 0.5rem;
+      background-color: var(--secondary);
+      border-radius: 9999px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background-color: var(--primary);
+      border-radius: 9999px;
+      transition: width 300ms;
+    }
+
+    .results {
+      margin-bottom: 1rem;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background-color: var(--card);
+      color: var(--card-foreground);
+      box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    }
+
+    .card-content {
+      padding: 1rem;
+      display: grid;
+      gap: 1rem;
+    }
+
+    .text-section {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+
+    .score-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .tag {
+      padding: 0.25rem 0.625rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .button {
+      width: 100%;
+      background-color: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      transition: background-color 150ms;
+    }
+
+    .button:hover {
+      background-color: hsl(var(--primary) / 0.9);
+    }
+
+    .button:focus {
+      outline: none;
+      ring: 2px solid hsl(var(--ring));
+      ring-offset: 2px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .tag-easy {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+
+    .dark .tag-easy {
+      background-color: #064e3b;
+      color: #86efac;
+    }
+
+    .tag-average {
+      background-color: #fef9c3;
+      color: #854d0e;
+    }
+
+    .dark .tag-average {
+      background-color: #713f12;
+      color: #fef08a;
+    }
+
+    .tag-hard {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+
+    .dark .tag-hard {
+      background-color: #7f1d1d;
+      color: #fecaca;
     }
   </style>
 </head>
-<body class="bg-white">
-  <div class="max-w-md mx-auto">
-    <h3 class="text-xl font-bold mb-2 text-gray-800">Reading Level Checker</h3>
-    <p class="text-sm text-gray-600 mb-4">Analyze text using Flesch-Kincaid Grade Level</p>
-    
-    <!-- Add progress bar container -->
-    <div id="progressContainer" class="hidden mb-4">
-      <div class="flex justify-between mb-1">
-        <span class="text-sm font-medium text-gray-700">Analyzing text...</span>
-        <span id="progressText" class="text-sm font-medium text-blue-600">0%</span>
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h3 class="title">Literacy</h3>
+        <p class="subtitle">Analyze text using Flesch-Kincaid Grade Level</p>
       </div>
-      <div class="w-full bg-gray-200 rounded-full h-2">
-        <div id="progressBar" 
-             class="bg-blue-500 h-2 rounded-full transition-all duration-300" 
-             style="width: 0%">
-        </div>
+      <button id="themeToggle" class="theme-toggle">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"/>
+          <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+        </svg>
+      </button>
+    </div>
+
+    <div id="progressContainer" class="progress-container hidden">
+      <div class="progress-header">
+        <span class="progress-text">Analyzing text...</span>
+        <span id="progressText" class="progress-text">0%</span>
+      </div>
+      <div class="progress-bar-container">
+        <div id="progressBar" class="progress-bar" style="width: 0%"></div>
       </div>
     </div>
 
-    <button 
-      id="checkBtn"
-      class="w-full bg-blue-500 text-white px-4 py-2 rounded-md
-             hover:bg-blue-600 focus:outline-none focus:ring-2 
-             focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-    >
+    <div id="results" class="results"></div>
+
+    <button id="checkBtn" class="button">
       Check Selected Text
     </button>
-
-    <!-- Add results section with header -->
-    <div class="mt-6" id="resultsSection">
-      <h4 id="resultsHeader" class="text-lg font-medium text-gray-800 mb-3 hidden">Analysis Results</h4>
-      <div id="results" class="space-y-2"></div>
-    </div>
   </div>
 
   <script>
+    const themeToggle = document.getElementById('themeToggle');
+    let isDark = false;
+
+    // Listen for messages from the plugin
+    window.onmessage = (event) => {
+      if (!event.data.pluginMessage) return;
+      const message = event.data.pluginMessage;
+      
+      if (message.type === 'init-theme') {
+        isDark = message.isDark;
+        document.documentElement.classList.toggle('dark', isDark);
+      } else if (message.type === 'analysis-progress') {
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        
+        progressContainer.classList.remove('hidden');
+        const percentage = Math.round(message.progress * 100);
+        progressBar.style.width = `${percentage}%`;
+        progressText.textContent = `${percentage}%`;
+      } else if (message.type === 'analysis-results') {
+        handleAnalysisResults(message);
+      }
+    };
+
+    function handleAnalysisResults(message) {
+      document.getElementById('progressContainer').classList.add('hidden');
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '';
+      
+      if (!message.results || message.results.length === 0) {
+        resultsDiv.innerHTML = `
+          <div class="card">
+            <div class="card-content">
+              Please select one or more text layers to analyze.
+            </div>
+          </div>
+        `;
+      } else {
+        message.results.forEach(result => {
+          resultsDiv.innerHTML += `
+            <div class="card">
+              <div class="card-content">
+                <div class="text-section">
+                  <p class="title">Selected Text</p>
+                  <p class="subtitle">${result.text}</p>
+                </div>
+                <div class="score-section">
+                  <div>
+                    <p class="title">Flesch-Kincaid Score</p>
+                    <p style="font-size: 1.5rem; font-weight: bold;">${result.score.toFixed(1)}</p>
+                  </div>
+                  <span class="tag ${getTagClass(result.readingLevel)}">
+                    ${result.readingLevel}
+                  </span>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      }
+      
+      resizeWindow();
+    }
+
+    // Theme toggle handler
+    themeToggle.onclick = () => {
+      isDark = !isDark;
+      document.documentElement.classList.toggle('dark', isDark);
+      parent.postMessage({ 
+        pluginMessage: { 
+          type: 'theme-changed',
+          isDark: isDark
+        }
+      }, '*');
+    };
+
     // Function to resize window
     function resizeWindow() {
       const height = Math.min(800, document.body.scrollHeight + 40);
@@ -60,92 +312,29 @@
       }, '*');
     }
 
+    // Button click handler
     document.getElementById('checkBtn').onclick = () => {
       document.getElementById('results').innerHTML = '';
-      document.getElementById('resultsHeader').classList.add('hidden');
       document.getElementById('progressContainer').classList.remove('hidden');
       
       parent.postMessage({ 
-        pluginMessage: { 
-          type: 'analyze-text'
-        }
+        pluginMessage: { type: 'analyze-text' }
       }, '*');
     };
 
-    function getColorClasses(readingLevel) {
+    // Helper function for tag classes
+    function getTagClass(readingLevel) {
       switch(readingLevel) {
         case 'Easy':
-          return 'border-green-300 bg-green-50 text-green-700';
+          return 'tag-easy';
         case 'Average':
-          return 'border-yellow-300 bg-yellow-50 text-yellow-700';
+          return 'tag-average';
         case 'Hard':
-          return 'border-red-300 bg-red-50 text-red-700';
+          return 'tag-hard';
         default:
-          return 'border-gray-300 bg-gray-50 text-gray-700';
+          return '';
       }
     }
-
-    window.onmessage = (event) => {
-      if (!event.data.pluginMessage) return;
-
-      const message = event.data.pluginMessage;
-      
-      if (message.type === 'analysis-progress') {
-        const progressContainer = document.getElementById('progressContainer');
-        const progressBar = document.getElementById('progressBar');
-        const progressText = document.getElementById('progressText');
-        
-        progressContainer.classList.remove('hidden');
-        const percentage = Math.round(message.progress * 100);
-        progressBar.style.width = `${percentage}%`;
-        progressText.textContent = `${percentage}%`;
-      }
-      
-      if (message.type === 'analysis-results') {
-        document.getElementById('progressContainer').classList.add('hidden');
-        
-        const resultsDiv = document.getElementById('results');
-        const resultsHeader = document.getElementById('resultsHeader');
-        resultsDiv.innerHTML = '';
-        
-        if (!message.results || message.results.length === 0) {
-          resultsHeader.classList.add('hidden');
-          resultsDiv.innerHTML = `
-            <div class="p-3 rounded-md border border-yellow-300 bg-yellow-50 text-yellow-700">
-              Please select one or more text layers to analyze.
-            </div>
-          `;
-        } else {
-          resultsHeader.classList.remove('hidden');
-          message.results.forEach(result => {
-            const div = document.createElement('div');
-            div.className = `p-3 rounded-md border ${getColorClasses(result.readingLevel)}`;
-            
-            const text = result.text.length > 30 ? 
-              result.text.slice(0, 30) + '...' : 
-              result.text;
-            
-            div.innerHTML = `
-              <p class="text-sm">
-                <span class="font-medium">Text:</span> "${text}"
-              </p>
-              <p class="text-sm mt-1">
-                <span class="font-medium">Flesch-Kincaid Score:</span> ${result.score.toFixed(1)}
-              </p>
-              <p class="text-sm mt-1">
-                <span class="font-medium">Reading Level:</span> 
-                <span class="font-semibold">${result.readingLevel}</span>
-              </p>
-            `;
-            
-            resultsDiv.appendChild(div);
-          });
-        }
-        
-        // Resize window after results are added
-        setTimeout(resizeWindow, 100);
-      }
-    };
 
     // Initial resize
     resizeWindow();
