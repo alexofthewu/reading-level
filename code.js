@@ -45,7 +45,13 @@ function updateSelectedNodes() {
   const textNodes = figma.currentPage.selection
     .filter(node => node.type === 'TEXT');
 
-  textNodes.forEach(node => {
+  textNodes.forEach((node, index) => {
+    // Send progress update
+    figma.ui.postMessage({
+      type: 'analysis-progress',
+      progress: (index + 1) / textNodes.length
+    });
+
     const text = node.characters;
     const grade = getFleschKincaidGrade(text);
     
@@ -54,7 +60,7 @@ function updateSelectedNodes() {
     const isGradeLevelAppropriate = grade <= targetGradeLevel;
     const gradeText = `Reading Level: Grade ${grade.toFixed(1)}`;
     const feedback = isGradeLevelAppropriate ? 
-      ` ✓ Meets Grade ${targetGradeLevel} target` : 
+      ` ✅ Meets Grade ${targetGradeLevel} target` : 
       ` ⚠️ Above Grade ${targetGradeLevel} level`;
     
     indicator.characters = gradeText + feedback;
