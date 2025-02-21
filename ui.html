@@ -10,6 +10,8 @@
     :root {
       --primary: 0 72.2% 50.6%;
       --primary-foreground: 0 85.7% 97.3%;
+      --background: 0 0% 100%;
+      --foreground: 0 0% 3.9%;
     }
     
     .dark {
@@ -32,6 +34,11 @@
       --border: 0 0% 14.9%;
       --input: 0 0% 14.9%;
       --ring: 0 72.2% 50.6%;
+    }
+
+    html, body {
+      background-color: hsl(var(--background));
+      color: hsl(var(--foreground));
     }
 
     body {
@@ -224,34 +231,56 @@
   </div>
 
   <script>
+    // Initialize DOM elements
     const themeToggle = document.getElementById('themeToggle');
+    const checkBtn = document.getElementById('checkBtn');
+    const progressContainer = document.getElementById('progressContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const resultsDiv = document.getElementById('results');
     let isDark = false;
 
-    // Listen for messages from the plugin
-    window.onmessage = (event) => {
-      if (!event.data.pluginMessage) return;
-      const message = event.data.pluginMessage;
-      
-      if (message.type === 'init-theme') {
-        isDark = message.isDark;
-        document.documentElement.classList.toggle('dark', isDark);
-      } else if (message.type === 'analysis-progress') {
-        const progressContainer = document.getElementById('progressContainer');
-        const progressBar = document.getElementById('progressBar');
-        const progressText = document.getElementById('progressText');
-        
-        progressContainer.classList.remove('hidden');
-        const percentage = Math.round(message.progress * 100);
-        progressBar.style.width = `${percentage}%`;
-        progressText.textContent = `${percentage}%`;
-      } else if (message.type === 'analysis-results') {
-        handleAnalysisResults(message);
+    // Function declarations
+    function handleThemeToggle() {
+      isDark = !isDark;
+      document.documentElement.classList.toggle('dark', isDark);
+      parent.postMessage({ 
+        pluginMessage: { 
+          type: 'theme-changed',
+          isDark: isDark
+        }
+      }, '*');
+    }
+
+    function handleCheckButton() {
+      resultsDiv.innerHTML = '';
+      progressContainer.classList.remove('hidden');
+      parent.postMessage({ 
+        pluginMessage: { type: 'analyze-text' }
+      }, '*');
+    }
+
+    function resizeWindow() {
+      const height = Math.min(800, document.body.scrollHeight + 40);
+      parent.postMessage({ 
+        pluginMessage: { 
+          type: 'resize', 
+          height: height 
+        }
+      }, '*');
+    }
+
+    function getTagClass(readingLevel) {
+      switch(readingLevel) {
+        case 'Easy': return 'tag-easy';
+        case 'Average': return 'tag-average';
+        case 'Hard': return 'tag-hard';
+        default: return '';
       }
-    };
+    }
 
     function handleAnalysisResults(message) {
-      document.getElementById('progressContainer').classList.add('hidden');
-      const resultsDiv = document.getElementById('results');
+      progressContainer.classList.add('hidden');
       resultsDiv.innerHTML = '';
       
       if (!message.results || message.results.length === 0) {
@@ -289,52 +318,35 @@
       resizeWindow();
     }
 
-    // Theme toggle handler
-    themeToggle.onclick = () => {
-      isDark = !isDark;
-      document.documentElement.classList.toggle('dark', isDark);
-      parent.postMessage({ 
-        pluginMessage: { 
-          type: 'theme-changed',
-          isDark: isDark
-        }
-      }, '*');
-    };
-
-    // Function to resize window
-    function resizeWindow() {
-      const height = Math.min(800, document.body.scrollHeight + 40);
-      parent.postMessage({ 
-        pluginMessage: { 
-          type: 'resize', 
-          height: height 
-        }
-      }, '*');
+    function handleProgress(message) {
+      progressContainer.classList.remove('hidden');
+      const percentage = Math.round(message.progress * 100);
+      progressBar.style.width = `${percentage}%`;
+      progressText.textContent = `${percentage}%`;
     }
 
-    // Button click handler
-    document.getElementById('checkBtn').onclick = () => {
-      document.getElementById('results').innerHTML = '';
-      document.getElementById('progressContainer').classList.remove('hidden');
+    // Event listeners
+    themeToggle.addEventListener('click', handleThemeToggle);
+    checkBtn.addEventListener('click', handleCheckButton);
+
+    // Plugin message handler
+    window.addEventListener('message', event => {
+      if (!event.data.pluginMessage) return;
+      const message = event.data.pluginMessage;
       
-      parent.postMessage({ 
-        pluginMessage: { type: 'analyze-text' }
-      }, '*');
-    };
-
-    // Helper function for tag classes
-    function getTagClass(readingLevel) {
-      switch(readingLevel) {
-        case 'Easy':
-          return 'tag-easy';
-        case 'Average':
-          return 'tag-average';
-        case 'Hard':
-          return 'tag-hard';
-        default:
-          return '';
+      switch (message.type) {
+        case 'init-theme':
+          isDark = message.isDark;
+          document.documentElement.classList.toggle('dark', isDark);
+          break;
+        case 'analysis-progress':
+          handleProgress(message);
+          break;
+        case 'analysis-results':
+          handleAnalysisResults(message);
+          break;
       }
-    }
+    });
 
     // Initial resize
     resizeWindow();

@@ -6,7 +6,10 @@
   "ui": "ui.html",
   "editorType": ["figma"],
   "networkAccess": {
-    "allowedDomains": ["https://cdn.tailwindcss.com"]
+    "allowedDomains": [
+      "https://fonts.googleapis.com",
+      "https://fonts.gstatic.com"
+    ]
   },
   "documentAccess": "dynamic",
   "capabilities": [],
