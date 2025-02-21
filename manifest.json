@@ -1,6 +1,6 @@
 {
-  "name": "Reading Level Checker",
-  "id": "reading.level.checker",
+  "name": "Literacy",
+  "id": "literacy.reading.level.checker",
   "api": "1.0.0",
   "main": "code.js",
   "ui": "ui.html",
@@ -15,6 +15,6 @@
   "capabilities": [],
   "permissions": [],
   "menu": [
-    {"name": "Check Reading Level", "command": "check-reading-level"}
+    {"name": "Literacy", "command": "check-reading-level"}
   ]
 }
