@@ -41,6 +41,12 @@ figma.ui.onmessage = (msg) => {
   }
 };
 
+function getReadingLevel(score) {
+  if (score <= 5) return 'Easy';
+  if (score <= 14) return 'Average';
+  return 'Hard';
+}
+
 function updateSelectedNodes() {
   const textNodes = figma.currentPage.selection
     .filter(node => node.type === 'TEXT');
@@ -57,24 +63,23 @@ function updateSelectedNodes() {
   const results = [];
 
   textNodes.forEach((node, index) => {
-    // Send progress update
     figma.ui.postMessage({
       type: 'analysis-progress',
       progress: (index + 1) / textNodes.length
     });
 
     const text = node.characters;
-    const grade = getFleschKincaidGrade(text);
+    const score = getFleschKincaidGrade(text);
+    const readingLevel = getReadingLevel(score);
     
-    // Add result to array instead of creating indicators
     results.push({
       text: text,
-      readingLevel: grade,
+      readingLevel: readingLevel,
+      score: score,
       nodeId: node.id
     });
   });
 
-  // Send all results at once
   figma.ui.postMessage({
     type: 'analysis-results',
     results: results,

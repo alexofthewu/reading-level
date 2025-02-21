@@ -71,6 +71,19 @@
       }, '*');
     };
 
+    function getColorClasses(readingLevel) {
+      switch(readingLevel) {
+        case 'Easy':
+          return 'border-green-300 bg-green-50 text-green-700';
+        case 'Average':
+          return 'border-yellow-300 bg-yellow-50 text-yellow-700';
+        case 'Hard':
+          return 'border-red-300 bg-red-50 text-red-700';
+        default:
+          return 'border-gray-300 bg-gray-50 text-gray-700';
+      }
+    }
+
     window.onmessage = (event) => {
       if (!event.data.pluginMessage) {
         console.log('Received invalid message:', event.data);
@@ -109,10 +122,7 @@
         
         message.results.forEach(result => {
           const div = document.createElement('div');
-          div.className = 'p-3 rounded-md border ' + 
-            (result.readingLevel > message.targetGrade 
-              ? 'border-red-300 bg-red-50 text-red-700' 
-              : 'border-green-300 bg-green-50 text-green-700');
+          div.className = `p-3 rounded-md border ${getColorClasses(result.readingLevel)}`;
           
           const text = result.text.length > 30 ? 
             result.text.slice(0, 30) + '...' : 
@@ -123,7 +133,11 @@
               <span class="font-medium">Text:</span> "${text}"
             </p>
             <p class="text-sm mt-1">
-              <span class="font-medium">Grade Level:</span> ${result.readingLevel.toFixed(1)}
+              <span class="font-medium">Flesch-Kincaid Score:</span> ${result.score.toFixed(1)}
+            </p>
+            <p class="text-sm mt-1">
+              <span class="font-medium">Reading Level:</span> 
+              <span class="font-semibold">${result.readingLevel}</span>
             </p>
           `;
           
