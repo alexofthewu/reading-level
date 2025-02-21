@@ -1,8 +1,17 @@
 {
   "name": "Reading Level Checker",
-  "id": "your-unique-plugin-id",
+  "id": "reading.level.checker",
   "api": "1.0.0",
   "main": "code.js",
   "ui": "ui.html",
-  "editorType": ["figma"]
+  "editorType": ["figma"],
+  "networkAccess": {
+    "allowedDomains": ["cdn.tailwindcss.com"]
+  },
+  "documentAccess": "dynamic",
+  "capabilities": [],
+  "permissions": [],
+  "menu": [
+    {"name": "Check Reading Level", "command": "check-reading-level"}
+  ]
 }

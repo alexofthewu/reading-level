@@ -13,6 +13,20 @@
   <div class="max-w-md mx-auto">
     <h3 class="text-xl font-bold mb-4 text-gray-800">Reading Level Checker</h3>
     
+    <!-- Add progress bar container -->
+    <div id="progressContainer" class="hidden mb-4">
+      <div class="flex justify-between mb-1">
+        <span class="text-sm font-medium text-gray-700">Analyzing text...</span>
+        <span id="progressText" class="text-sm font-medium text-blue-600">0%</span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-2">
+        <div id="progressBar" 
+             class="bg-blue-500 h-2 rounded-full transition-all duration-300" 
+             style="width: 0%">
+        </div>
+      </div>
+    </div>
+
     <div class="mb-4">
       <label class="block text-sm font-medium text-gray-700 mb-2">
         Target Grade Level:
@@ -54,7 +68,22 @@
 
     window.onmessage = (event) => {
       const message = event.data.pluginMessage;
+      
+      if (message.type === 'analysis-progress') {
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        
+        progressContainer.classList.remove('hidden');
+        const percentage = Math.round(message.progress * 100);
+        progressBar.style.width = `${percentage}%`;
+        progressText.textContent = `${percentage}%`;
+      }
+      
       if (message.type === 'analysis-results') {
+        // Hide progress bar when complete
+        document.getElementById('progressContainer').classList.add('hidden');
+        
         const resultsDiv = document.getElementById('results');
         resultsDiv.innerHTML = '';
         
