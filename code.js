@@ -44,7 +44,7 @@ function getReadingLevel(score) {
 }
 
 // Function to analyze text
-async function analyzeSelectedText() {
+function analyzeSelectedText() {
   const selection = figma.currentPage.selection;
   
   // Check if selection contains text nodes or components with text
@@ -90,15 +90,12 @@ figma.on('selectionchange', () => {
 
 // Listen for text changes in selected nodes
 figma.on('documentchange', (event) => {
-  // Check if the change affects any selected nodes
   const selectedNodes = figma.currentPage.selection;
   const selectedIds = new Set(selectedNodes.map(node => node.id));
   
-  // If any changed node is selected or is within a selected component, reanalyze
   const shouldReanalyze = event.documentChanges.some(change => {
     if (selectedIds.has(change.id)) return true;
     
-    // Check if the changed node is within a selected component
     const node = figma.getNodeById(change.id);
     if (node && node.type === "TEXT") {
       let currentParent = node.parent;
@@ -118,10 +115,11 @@ figma.on('documentchange', (event) => {
 // Listen for UI messages
 figma.ui.onmessage = (message) => {
   if (message.type === 'resize') {
-    // Set exact height from content
     figma.ui.resize(420, message.height);
   }
 };
 
-// Initial analysis of any selected text
-analyzeSelectedText();
+// Initial analysis
+setTimeout(() => {
+  analyzeSelectedText();
+}, 100);

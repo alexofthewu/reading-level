@@ -9,17 +9,37 @@
     body {
       margin: 0;
       padding: 16px;
+      padding-right: calc(16px + 12px); /* Extra padding for scrollbar */
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
       background-color: hsl(240 10% 3.9%);
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
-      overflow: hidden;
+      max-height: 600px;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     .container {
       max-width: 100%;
       margin: 0 auto;
-      overflow: hidden;
+    }
+
+    /* Customize scrollbar */
+    body::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    body::-webkit-scrollbar-thumb {
+      background-color: hsla(240, 5%, 64.9%, .3);
+      border-radius: 4px;
+    }
+
+    body::-webkit-scrollbar-thumb:hover {
+      background-color: hsla(240, 5%, 64.9%, .4);
     }
 
     .header {
@@ -292,6 +312,14 @@
       text-align: left;
       width: 100%;
     }
+
+    .sentence-case-error {
+      color: hsl(0 84.2% 60.2%);  /* Same red as readability-hard */
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1;
+      margin: 0;
+    }
   </style>
 </head>
 <body>
@@ -324,54 +352,103 @@
     }
 
     function isSentenceCase(text) {
-      // Add a period if text doesn't end with punctuation
-      const normalizedText = text.trim().replace(/[.!?]*$/, '') + '.';
-      
-      // Split into sentences, handling multiple punctuation marks and preserving whitespace
+      // If text is too long, return null to indicate "Too Many"
+      if (text.length > 1000) {
+        return null;
+      }
+
+      // Normalize text: ensure proper spacing after punctuation
+      const normalizedText = text
+        .trim()
+        // Normalize multiple spaces
+        .replace(/\s+/g, ' ');
+
+      // For short phrases without punctuation, treat as one sentence
+      if (!normalizedText.match(/[.!?]/)) {
+        const firstLetterMatch = normalizedText.match(/[a-zA-Z]/);
+        if (!firstLetterMatch) return true;
+
+        const firstLetter = firstLetterMatch[0];
+        const pos = firstLetterMatch.index;
+        const restOfText = normalizedText.slice(pos + 1);
+
+        // List of words that can be capitalized mid-sentence
+        const allowedCapitalized = /^(I|OK|ID|UI|UX|URL|API|XML|HTML|CSS|iOS|iPhone|iPad|macOS|SQL)$/;
+
+        // Check each word in the rest of the text
+        const words = restOfText.split(/\s+/);
+        const hasIncorrectCase = words.some(word => {
+          // Skip empty words or single letters
+          if (!word || word.length <= 1) return false;
+          
+          // Allow specific capitalized words
+          if (allowedCapitalized.test(word)) return false;
+          
+          // Check for incorrect capitalization:
+          // - Words in all caps (except allowed acronyms)
+          // - Words with any capital letters
+          return /^[A-Z]+$/.test(word) || /[A-Z]/.test(word);
+        });
+
+        // Check if first word is all caps (incorrect)
+        const firstWord = normalizedText.split(/\s+/)[0];
+        const isFirstWordAllCaps = /^[A-Z]{2,}/.test(firstWord);
+
+        // First letter should be uppercase, first word shouldn't be all caps,
+        // and no other words should be capitalized (unless allowed)
+        return firstLetter === firstLetter.toUpperCase() && 
+               !isFirstWordAllCaps && 
+               !hasIncorrectCase;
+      }
+
+      // For multiple sentences, use the more complex logic
       const sentences = normalizedText.split(/(?<=[.!?])\s+/);
-      
+
       return sentences.every(sentence => {
         // Skip empty sentences
         if (!sentence.trim()) return true;
-        
-        // Find the first letter character in the sentence
+
+        // Find first letter
         const firstLetterMatch = sentence.match(/[a-zA-Z]/);
-        if (!firstLetterMatch) return true; // No letters in sentence
-        
-        // Get the first letter and its position
+        if (!firstLetterMatch) return true;
+
         const firstLetter = firstLetterMatch[0];
         const pos = firstLetterMatch.index;
-        
-        // Check if first letter is uppercase
+
+        // Check if sentence starts with capital
         const isFirstUppercase = firstLetter === firstLetter.toUpperCase();
-        
-        // Check if any other letters in the sentence are incorrectly uppercase
+
+        // Get rest of sentence
         const restOfSentence = sentence.slice(pos + 1);
+
+        // List of common proper nouns and abbreviations
+        const properNouns = /^(I|Mr\.|Mrs\.|Ms\.|Dr\.|Prof\.|Inc\.|Ltd\.|Co\.|Sr\.|Jr\.)$/;
+        
+        // Check for incorrect uppercase letters
         const hasIncorrectUppercase = restOfSentence
-          .split(/[.!?]\s+/) // Handle any nested sentences
-          .some(part => {
-            // Allow proper nouns and common acronyms
-            const words = part.split(/\s+/);
-            return words.some(word => {
-              // Skip empty words or single letters
-              if (word.length <= 1) return false;
-              // Skip words that look like proper nouns or acronyms
-              if (/^[A-Z][a-z]+$/.test(word) || /^[A-Z]+$/.test(word)) return false;
-              // Check for any other uppercase letters
-              return /[A-Z]/.test(word);
-            });
+          .split(/\s+/)
+          .some(word => {
+            // Skip empty words
+            if (!word || word.length <= 1) return false;
+            
+            // Allow proper nouns and abbreviations
+            if (properNouns.test(word)) return false;
+            
+            // Allow all-caps words (acronyms)
+            if (/^[A-Z]+$/.test(word)) return false;
+            
+            // Check for any other uppercase letters
+            return /[a-z][A-Z]/.test(word) || /^[A-Z][a-z]+[A-Z]/.test(word);
           });
 
         return isFirstUppercase && !hasIncorrectUppercase;
       });
     }
 
-    // Function to update window height
+    // Update window height handling
     function updateWindowHeight() {
-      requestAnimationFrame(() => {
-        const height = document.body.scrollHeight;
-        parent.postMessage({ pluginMessage: { type: 'resize', height } }, '*');
-      });
+      const height = Math.min(document.body.scrollHeight, 600);
+      parent.postMessage({ pluginMessage: { type: 'resize', height } }, '*');
     }
 
     // Create observer for content changes
@@ -403,11 +480,31 @@
             resultsDiv.innerHTML += `<div class="selection-divider"></div>`;
           }
 
-          const isSentenceCaseUsed = isSentenceCase(result.text);
-          const iconClass = isSentenceCaseUsed ? 'icon-success' : 'icon-failure';
-          const icon = isSentenceCaseUsed 
-            ? '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>'
-            : '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+          const sentenceCaseResult = isSentenceCase(result.text);
+          let sentenceCaseContent;
+          
+          if (sentenceCaseResult === null) {
+            // Too many sentences
+            sentenceCaseContent = `
+              <div class="analysis-result">
+                <p class="analysis-label">Sentence Case</p>
+                <p class="sentence-case-error">Too Many</p>
+              </div>
+            `;
+          } else {
+            // Normal check result
+            const iconClass = sentenceCaseResult ? 'icon-success' : 'icon-failure';
+            const icon = sentenceCaseResult 
+              ? '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>'
+              : '<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+            
+            sentenceCaseContent = `
+              <div class="analysis-result">
+                <p class="analysis-label">Sentence Case</p>
+                <span class="${iconClass}">${icon}</span>
+              </div>
+            `;
+          }
 
           resultsDiv.innerHTML += `
             <div class="card selected-text-card">
@@ -423,10 +520,7 @@
               <div class="analysis-row">
                 <div class="card analysis-card">
                   <div class="card-content">
-                    <div class="analysis-result">
-                      <p class="analysis-label">Sentence Case</p>
-                      <span class="${iconClass}">${icon}</span>
-                    </div>
+                    ${sentenceCaseContent}
                   </div>
                 </div>
                 <div class="card analysis-card">
