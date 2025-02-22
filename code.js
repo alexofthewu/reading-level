@@ -1,7 +1,9 @@
 // This plugin checks text layers for reading level using Flesch-Kincaid Grade Level
+const DEFAULT_HEIGHT = 300;
+
 figma.showUI(__html__, { 
   width: 420, 
-  height: 300,
+  height: DEFAULT_HEIGHT,
   themeColors: true 
 });
 
@@ -116,7 +118,8 @@ figma.on('documentchange', (event) => {
 // Listen for UI messages
 figma.ui.onmessage = (message) => {
   if (message.type === 'resize') {
-    figma.ui.resize(420, message.height + 10);
+    // Set exact height from content
+    figma.ui.resize(420, message.height);
   }
 };
 

@@ -276,7 +276,7 @@
   </div>
 
   <script>
-    const resultsDiv = document.getElementById('results');
+    let resultsDiv;
 
     function handleCheckButton() {
       resultsDiv.innerHTML = '';
@@ -339,11 +339,18 @@
 
     // Function to update window height
     function updateWindowHeight() {
-      const height = document.body.scrollHeight;
-      parent.postMessage({ pluginMessage: { type: 'resize', height } }, '*');
+      requestAnimationFrame(() => {
+        const height = document.body.scrollHeight;
+        parent.postMessage({ pluginMessage: { type: 'resize', height } }, '*');
+      });
     }
 
-    // Call updateWindowHeight after results are rendered
+    // Create observer for content changes
+    const resizeObserver = new ResizeObserver(() => {
+      updateWindowHeight();
+    });
+
+    // Function to handle analysis results
     function handleAnalysisResults(message) {
       resultsDiv.innerHTML = '';
       
@@ -405,24 +412,27 @@
         });
       }
       
-      // Update height after content is rendered
-      setTimeout(updateWindowHeight, 0);
+      // Update height after content renders
+      updateWindowHeight();
     }
 
-    // Initial height update
-    setTimeout(updateWindowHeight, 0);
-
-    document.addEventListener('DOMContentLoaded', () => {
-      resultsDiv = document.getElementById('results');
-    });
-
-    window.addEventListener('message', event => {
-      if (!event.data.pluginMessage) return;
+    // Listen for messages from the plugin
+    onmessage = (event) => {
       const message = event.data.pluginMessage;
-      
       if (message.type === 'analysis-results') {
         handleAnalysisResults(message);
       }
+    };
+
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+      resultsDiv = document.getElementById('results');
+      
+      // Observe results div for size changes
+      resizeObserver.observe(resultsDiv);
+      
+      // Initial height update
+      updateWindowHeight();
     });
   </script>
 </body>
