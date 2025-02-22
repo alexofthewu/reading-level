@@ -156,6 +156,35 @@
       max-width: 100%;
     }
 
+    .selected-text.truncated {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      white-space: normal;
+      text-overflow: ellipsis;
+      max-height: 4.5rem;  /* 3 lines × 1.5rem line-height */
+      position: relative;
+      padding-bottom: 0;
+    }
+
+    .selected-text.truncated::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 100%;
+      height: 0.75rem;
+      background: linear-gradient(to bottom, transparent, hsl(240 6% 12%));
+    }
+
+    .selection-divider {
+      height: 1px;
+      background-color: var(--figma-color-border);
+      margin: 0.75rem 0;
+      opacity: 0.5;
+    }
+
     .sentence-case-value {
       font-size: 1rem;
       font-weight: 500;
@@ -354,6 +383,10 @@
     function handleAnalysisResults(message) {
       resultsDiv.innerHTML = '';
       
+      // Hide/show header based on selection
+      const headerDiv = document.querySelector('.header');
+      headerDiv.style.display = message.results && message.results.length > 0 ? 'none' : 'block';
+      
       if (!message.results || message.results.length === 0) {
         resultsDiv.innerHTML = `
           <div class="card">
@@ -363,7 +396,13 @@
           </div>
         `;
       } else {
-        message.results.forEach(result => {
+        const hasMultipleSelections = message.results.length > 1;
+        
+        message.results.forEach((result, index) => {
+          if (index > 0) {
+            resultsDiv.innerHTML += `<div class="selection-divider"></div>`;
+          }
+
           const isSentenceCaseUsed = isSentenceCase(result.text);
           const iconClass = isSentenceCaseUsed ? 'icon-success' : 'icon-failure';
           const icon = isSentenceCaseUsed 
@@ -376,7 +415,7 @@
                 <div class="selected-text-header">
                   <h2 class="title">Selected Text</h2>
                 </div>
-                <div class="selected-text">${result.text}</div>
+                <div class="selected-text ${hasMultipleSelections ? 'truncated' : ''}">${result.text}</div>
               </div>
             </div>
             <div class="analysis-section">
@@ -412,7 +451,6 @@
         });
       }
       
-      // Update height after content renders
       updateWindowHeight();
     }
 
