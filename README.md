@@ -17,7 +17,7 @@ To develop and test the plugin locally, follow these steps:
 
 ### 1. Clone the Repository  
 ```sh
-git clone https://github.com/your-username/reading-level.git
+git clone https://github.com/alexofthewu/reading-level.git
 cd reading-level
 ```
 
