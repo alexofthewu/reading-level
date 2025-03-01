@@ -38,9 +38,37 @@ function getFleschKincaidGrade(text) {
 }
 
 function getReadingLevel(score) {
-  if (score <= 5) return 'Easy';
-  if (score <= 14) return 'Average';
+  if (score <= 6) return 'Easy';
+  if (score <= 12) return 'Average';
   return 'Hard';
+}
+
+function getGradeLevel(score) {
+  if (score <= 3) return 'Kindergarten';
+  if (score <= 6) return 'Elementary';
+  if (score <= 9) return 'Middle School';
+  if (score <= 12) return 'High School';
+  if (score <= 15) return 'College';
+  return 'Post-graduate';
+}
+
+function getReadabilityClass(readingLevel) {
+  switch (readingLevel) {
+    case 'Easy':
+    case 'Kindergarten':
+    case 'Elementary':
+      return 'readability-easy'; // For Kindergarten and Elementary
+    case 'Average':
+    case 'Middle School':
+      return 'readability-average'; // For Middle School
+    case 'Hard':
+    case 'High School':
+    case 'College':
+    case 'Post-graduate':
+      return 'readability-hard'; // For High School, College, and Post-graduate
+    default:
+      return '';
+  }
 }
 
 // Function to analyze text
@@ -64,10 +92,12 @@ function analyzeSelectedText() {
   if (selectedTextNodes.length > 0) {
     const results = selectedTextNodes.map((text) => {
       const score = getFleschKincaidGrade(text);
+      const gradeLevel = getGradeLevel(score);
       return {
         text,
         score,
-        readingLevel: getReadingLevel(score)
+        readingLevel: getReadingLevel(score),
+        gradeLevel
       };
     });
 

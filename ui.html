@@ -348,9 +348,12 @@
 
     function getReadabilityClass(readingLevel) {
       switch(readingLevel) {
-        case 'Easy': return 'readability-easy';
-        case 'Average': return 'readability-average';
-        case 'Hard': return 'readability-hard';
+        case 'Kindergarten': return 'readability-easy';
+        case 'Elementary': return 'readability-easy';
+        case 'Middle School': return 'readability-average';
+        case 'High School': return 'readability-hard';
+        case 'College': return 'readability-hard';
+        case 'Post-graduate': return 'readability-hard';
         default: return '';
       }
     }
@@ -522,16 +525,11 @@
             <div class="analysis-section">
               <h4 class="analysis-title">Analysis</h4>
               <div class="analysis-row">
-                <div class="card analysis-card">
-                  <div class="card-content">
-                    ${sentenceCaseContent}
-                  </div>
-                </div>
-                <div class="card analysis-card">
+               <div class="card analysis-card">
                   <div class="card-content">
                     <div class="analysis-result">
-                      <p class="analysis-label">Readability</p>
-                      <p class="readability-value ${getReadabilityClass(result.readingLevel)}">${result.readingLevel}</p>
+                      <p class="analysis-label">Grade Level</p>
+                      <p class="readability-value ${getReadabilityClass(result.gradeLevel)}">${result.gradeLevel}</p>
                     </div>
                   </div>
                 </div>
@@ -543,26 +541,37 @@
                     </div>
                   </div>
                 </div>
+                </div>
+                <div class="analysis-row">
+                <div class="card analysis-card">
+                  <div class="card-content">
+                    ${sentenceCaseContent}
+                  </div>
+                </div>
               </div>
               <!-- New row for Cognitive Load Analysis and Read Aloud Sim -->
               <div class="analysis-row">
                 <div class="card analysis-card card-disabled">
                   <div class="card-content">
                     <div class="analysis-result">
-                      <p class="analysis-label">Cognitive Load Analysis</p>
-                      <p class="score-value opacity-50">Coming soon</p>
+                      <p class="analysis-label">Cognitive Load</p>
+                      <p class="score-value opacity-50">Soon™</p>
                     </div>
                   </div>
                 </div>
                 <div class="card analysis-card card-disabled">
                   <div class="card-content">
                     <div class="analysis-result">
-                      <p class="analysis-label">Read Aloud Sim</p>
-                      <p class="score-value opacity-50">Coming soon</p>
+                      <p class="analysis-label">Oral Fluency</p>
+                      <p class="score-value opacity-50">Soon™</p>
                     </div>
                   </div>
                 </div>
               </div>
+              </div>
+              
+              
+              
             </div>
           `;
         });
