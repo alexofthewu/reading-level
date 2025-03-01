@@ -201,7 +201,7 @@
     .selection-divider {
       height: 1px;
       background-color: var(--figma-color-border);
-      margin: 0.75rem 0;
+      margin: 0 0 0.75rem 1rem ;
       opacity: 0.5;
     }
 
@@ -319,6 +319,10 @@
       font-weight: 700;
       line-height: 1;
       margin: 0;
+    }
+
+    .opacity-50 {
+      opacity: 0.5;
     }
   </style>
 </head>
@@ -536,6 +540,25 @@
                     <div class="analysis-result">
                       <p class="analysis-label">Flesch-Kincaid</p>
                       <p class="score-value">${result.score.toFixed(1)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- New row for Cognitive Load Analysis and Read Aloud Sim -->
+              <div class="analysis-row">
+                <div class="card analysis-card card-disabled">
+                  <div class="card-content">
+                    <div class="analysis-result">
+                      <p class="analysis-label">Cognitive Load Analysis</p>
+                      <p class="score-value opacity-50">Coming soon</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="card analysis-card card-disabled">
+                  <div class="card-content">
+                    <div class="analysis-result">
+                      <p class="analysis-label">Read Aloud Sim</p>
+                      <p class="score-value opacity-50">Coming soon</p>
                     </div>
                   </div>
                 </div>
