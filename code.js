@@ -49,7 +49,7 @@ function getGradeLevel(score) {
   if (score <= 9) return 'Middle School';
   if (score <= 12) return 'High School';
   if (score <= 15) return 'College';
-  return 'Post-graduate';
+  return 'Post-grad';
 }
 
 function getReadabilityClass(readingLevel) {
@@ -64,7 +64,7 @@ function getReadabilityClass(readingLevel) {
     case 'Hard':
     case 'High School':
     case 'College':
-    case 'Post-graduate':
+    case 'Post-grad':
       return 'readability-hard'; // For High School, College, and Post-graduate
     default:
       return '';
